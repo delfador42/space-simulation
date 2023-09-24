@@ -1,0 +1,17 @@
+html,body {
+  background-color: black;
+  margin: 0;
+  padding: 0;
+}
+
+
+.center-wrapper {
+  display: flex;
+  justify-content: center;
+  /* align-items: flex-start; */
+  height: 100vh;
+}
+
+#canvas {
+/*transform: scale(0.8); */
+}
