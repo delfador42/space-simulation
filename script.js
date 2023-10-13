@@ -97,14 +97,10 @@ function curlNoise(p, scale, delta) {
 
     // Perlin noise means that values close to each other in the input space will also be close in the output space, creating a smooth, continuous function.
 
-    //const noiseLeft = noise.perlin2(scaledX - scale, scaledY);
-    const noiseLeft = simpleNoise.noise(scaledX - scale)
-    //const noiseRight = noise.perlin2(scaledX + scale, scaledY);
-    const noiseRight = simpleNoise.noise(scaledX + scale)
-    //const noiseUp = noise.perlin2(scaledX, scaledY - scale);
-    const noiseUp = simpleNoise.noise(scaledY - scale);
-    //const noiseDown = noise.perlin2(scaledX, scaledY + scale);
-    const noiseDown = simpleNoise.noise(scaledY + scale);
+    const noiseLeft = noise.perlin2(scaledX - scale, scaledY);
+    const noiseRight = noise.perlin2(scaledX + scale, scaledY);
+    const noiseUp = noise.perlin2(scaledX, scaledY - scale);
+    const noiseDown = noise.perlin2(scaledX, scaledY + scale);
 
     // Compute curl noise based on Perlin noise gradient
     return new Point(noiseUp - noiseDown, noiseLeft - noiseRight)
