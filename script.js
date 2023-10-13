@@ -145,7 +145,7 @@ function raf() {
     // K effects the density of the planet
     // A large K (250) makes the planet very small and dense
     // A small K (2) makes the planet have a disk, black center, like a black hole
-    var K = 25;
+    var K = 2;
 
     // A small k makes the particles move like a water fall, in a downard or upward way
     var scale = 0.05;
