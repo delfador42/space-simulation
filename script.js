@@ -1,13 +1,26 @@
-// Set up a canvas that is 1300 x 1200
-function getContext() {
+function getContext(w, h) {
     var canvas = document.getElementById('canvas');
 
-    canvas.width = 1300;
-    canvas.height = 1200;
+    canvas.width = w;
+    canvas.height = h;
 
     return canvas.getContext("2d");
 }
-var ctx = getContext();
+//! ::NOTE:: The canvas dimensions and its display size are two different matters, often
+//! confused but crucial to distinguish
+
+// When you set the width and height attributes of the canvas element, you are
+// setting the dimensions of the drawing surface. This is where your shapes and
+// images will be rendered.
+var w = 120;
+var h = 120;
+
+//  the size at which the canvas is displayed on the web page can be different.
+//  This is controlled by CSS and can be set using the style attribute or a CSS
+//  stylesheet. 
+canvas.style.width = w + "px";
+canvas.style.height = h + "px";
+var ctx = getContext(w, h);
 
 class Point {
     constructor(x, y) {
@@ -49,13 +62,25 @@ class Point {
     }
 }
 
+// Perlin noise means that values close to each other in the input space will
+// also be close in the output space, creating a smooth, continuous function.
+class SimpleNoise {
+  constructor(seed) {
+    this.seed = seed;
+  }
 
-var w = 1900;
-var h = 1850;
-//circle size, default 3
-var radius = Math.min(w, h) / 3.3;
-var points = []; // Array Data Structure that will hold point objects
-var count = 150;  // Count^2 is the number of points on the canvas, default 150
+  noise(x) {
+    return Math.sin(this.seed + x * Math.cos(this.seed));
+  }
+}
+
+// By taking the .min() we ensure that the circle fits within the canvas
+var canvasPercentage = 1.00 / 2;  // 100% of the canvas size, by dividing by two we ensure that the radius is half the canvas width
+var radius = Math.min(w, h) * canvasPercentage;  // Size of circle
+var pointsPerUnit = .3;  // Number of points per unit of radius, adjust as needed
+var count = Math.floor(radius * pointsPerUnit);  // count^2 is the number of points on the canvas
+var points = [];  // array of point objects
+
 
 function createPoint(i, j, count, radius) {
   const x = j / count * radius - radius / 2;
@@ -77,15 +102,6 @@ for (let i = 0; i < count; i++) {
 
 
 
-class SimpleNoise {
-  constructor(seed) {
-    this.seed = seed;
-  }
-
-  noise(x) {
-    return Math.sin(this.seed + x * Math.cos(this.seed));
-  }
-}
 
 
 
@@ -95,19 +111,13 @@ function curlNoise(p, scale, delta) {
     const scaledY = scale * p.y;
     const simpleNoise = new SimpleNoise(0); // Initialize with a seed
 
-    // Perlin noise means that values close to each other in the input space will also be close in the output space, creating a smooth, continuous function.
 
-    //const noiseLeft = noise.perlin2(scaledX - scale, scaledY);
     const noiseLeft = simpleNoise.noise(scaledX - scale)
-    //const noiseRight = noise.perlin2(scaledX + scale, scaledY);
     const noiseRight = simpleNoise.noise(scaledX + scale)
-    //const noiseUp = noise.perlin2(scaledX, scaledY - scale);
     const noiseUp = simpleNoise.noise(scaledY - scale);
-    //const noiseDown = noise.perlin2(scaledX, scaledY + scale);
     const noiseDown = simpleNoise.noise(scaledY + scale);
 
-    // Compute curl noise based on Perlin noise gradient
-    return new Point(noiseUp - noiseDown, noiseLeft - noiseRight)
+    return new Point(noiseUp * noiseDown, noiseLeft * noiseRight)
         .normalize()
         .multiplyScalar(1.0 / (2.0 * delta));
 }
@@ -117,50 +127,41 @@ function curlNoise(p, scale, delta) {
 // raf() is a rendering loop
 function raf() {
 
-    /*
-    The window.requestAnimationFrame() method tells the browser that you wish to
-    perform an animation and requests that the browser calls a specified function to
-    update an animation right before the next repaint.
-    */
-    requestAnimationFrame(raf);
+    requestAnimationFrame(raf); // Schedule the next frame of the animation.
+    //? What do you mean next repain?
 
-    // Restores the most recently saved canvas state
-    ctx.restore();
+    
+    ctx.restore(); // Restore canvas to last saved state
+    //? Why is this necessary?
 
-    ctx.fillStyle = "rgba(0,0,0,0)";   // Make the canvas drawing transparent
-    ctx.strokeStyle = "#03e9f4";        // Make the points blue
+    //ctx.fillStyle = "rgba(100,10,10,10)";   // Make the canvas drawing transparent
+    //? Why doesn't this do anything?
 
-    //ctx.globalAlpha = 15 / 0xff;
-    // fill and clear entire canvas, to reset canvas
-    //ctx.fillRect(0, 0, w, h);       
-    ctx.clearRect(0, 0, w, h);
+    ctx.strokeStyle = "#03e9f4"; // Set point color
+
+    ctx.clearRect(0, 0, w, h);  // Clear entire canvas
 
 
-
+    // save() saves the state of the canvas, , which is affected by rotate,
+    // translate, scale, etc. It does not save any of the actual content of the
+    // canvas.
     ctx.save();
-    ctx.translate(w / 3, h / 3);
-    //ctx.globalAlpha = 0.2;
-    //ctx.globalAlpha = 1;
+
+    // https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/translate
+    // By dividing w and h by 2 we are effectivly moving the origin to the
+    // center of the grid instead of the top left
+    ctx.translate(w / 2, h / 2);  
 
     // K effects the density of the planet
     // A large K (250) makes the planet very small and dense
     // A small K (2) makes the planet have a disk, black center, like a black hole
     var K = 25;
 
-    // A small k makes the particles move like a water fall, in a downard or upward way
     var scale = 0.05;
     var time = Date.now() * 0.001;  // slow or speed up the moving particles
-    var d = new Point(Math.cos(time), Math.sin(time));  // Create a new point based on the time
 
-    // Create a new point at the origin    
-    var n = new Point(0, 0);
 
-    // double time
-    var t = time * 2; // lerp( Math.abs( Math.sin( time * .01 ) ), time * 2, Math.sin( time ) * 10 ); 
-
-    // the '10' here controls how fast the swirls moves across the scene, '40' is lines, much better
-    var o = new Point(time * 10, t);
-    // .add adds one point to another, so modify point by adding some Noise
+    var o = new Point(time, 0);
     o.add(curlNoise(o, 0.05, 2));
 
     var length, x, y, r0 = radius;
@@ -199,6 +200,7 @@ function raf() {
             p.copy(p.origin);
             p.life = Math.random() * 100;
         }
+
     });
     ctx.stroke();
 }
