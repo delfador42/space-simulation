@@ -8,3 +8,12 @@ $ python3 -m http.server
 
 :: In your browser
 http://localhost:8000/index.html
+
+
+
+
+
+
+
+
+
