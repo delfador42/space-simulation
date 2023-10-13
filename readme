@@ -1,9 +1,12 @@
 Branches:: 
-nebula_1 -- classic look for planetary body
-nebula_2  -- a more fine grained planetary shape
+nebula_1 -- Classic look for planetary body
+nebula_2  -- A more fine grained planetary shape
+nebula_3 -- Simulate the look of an event horizon
 
 
 Run:: 
+$ git clone https://github.com/kairos0x42/space-simulation.git
+$ cd space-simulation
 $ python3 -m http.server
 
 :: In your browser
