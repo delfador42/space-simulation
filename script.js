@@ -12,8 +12,8 @@ function getContext(w, h) {
 // When you set the width and height attributes of the canvas element, you are
 // setting the dimensions of the drawing surface. This is where your shapes and
 // images will be rendered.
-var w = 120;
-var h = 120;
+var w = 1000;
+var h = 1000;
 
 //  the size at which the canvas is displayed on the web page can be different.
 //  This is controlled by CSS and can be set using the style attribute or a CSS
@@ -77,7 +77,7 @@ class SimpleNoise {
 // By taking the .min() we ensure that the circle fits within the canvas
 var canvasPercentage = 1.00 / 2;  // 100% of the canvas size, by dividing by two we ensure that the radius is half the canvas width
 var radius = Math.min(w, h) * canvasPercentage;  // Size of circle
-var pointsPerUnit = .3;  // Number of points per unit of radius, adjust as needed
+var pointsPerUnit = .9;  // Number of points per unit of radius, adjust as needed
 var count = Math.floor(radius * pointsPerUnit);  // count^2 is the number of points on the canvas
 var points = [];  // array of point objects
 
@@ -128,14 +128,10 @@ function curlNoise(p, scale, delta) {
 function raf() {
 
     requestAnimationFrame(raf); // Schedule the next frame of the animation.
-    //? What do you mean next repain?
 
     
     ctx.restore(); // Restore canvas to last saved state
-    //? Why is this necessary?
 
-    //ctx.fillStyle = "rgba(100,10,10,10)";   // Make the canvas drawing transparent
-    //? Why doesn't this do anything?
 
     ctx.strokeStyle = "#03e9f4"; // Set point color
 
@@ -155,7 +151,7 @@ function raf() {
     // K effects the density of the planet
     // A large K (250) makes the planet very small and dense
     // A small K (2) makes the planet have a disk, black center, like a black hole
-    var K = 25;
+    var K = 30;
 
     var scale = 0.05;
     var time = Date.now() * 0.001;  // slow or speed up the moving particles
@@ -192,7 +188,8 @@ function raf() {
 
         if (transformedPoint) {
             ctx.moveTo(transformedPoint.x, transformedPoint.y);
-            ctx.lineTo(transformedPoint.x + 1, transformedPoint.y);
+            // + 1 effects the size of the point, smaller value smaller point
+            ctx.lineTo(transformedPoint.x + .2, transformedPoint.y);
         }
 
         //respawn
